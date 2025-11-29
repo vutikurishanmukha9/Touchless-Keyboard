@@ -1,0 +1,8 @@
+opencv-python>=4.8.0
+cvzone>=1.6.1
+PyAutoGUI>=0.9.54
+pygame>=2.5.0
+screeninfo>=0.8.1
+pandas>=2.0.0
+mediapipe>=0.10.0
+pyperclip>=1.8.2

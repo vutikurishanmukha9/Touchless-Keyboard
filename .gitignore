@@ -1,1 +1,28 @@
+# Virtual Environment
 .venv/
+venv/
+env/
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Generated Data
+gesture_data.csv
+
+# OS
+.DS_Store
+Thumbs.db
