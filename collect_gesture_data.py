@@ -1,4 +1,4 @@
-"""
+﻿"""
 Gesture Data Collection Tool
 
 This script captures hand gesture data for machine learning training.
@@ -23,14 +23,14 @@ columns = [f"x{i},y{i},z{i}" for i in range(21)] + ["label"]
 if not os.path.exists(CSV_FILENAME):
     df = pd.DataFrame(columns=columns)
     df.to_csv(CSV_FILENAME, index=False)
-    print(f"✅ Created new CSV file: {CSV_FILENAME}")
+    print(f" Created new CSV file: {CSV_FILENAME}")
 else:
-    print(f"📂 Using existing CSV file: {CSV_FILENAME}")
+    print(f" Using existing CSV file: {CSV_FILENAME}")
 
 # Initialize camera and hand detector
 cap = cv2.VideoCapture(0)
 if not cap.isOpened():
-    print("❌ Error: Could not open webcam. Please check your camera connection.")
+    print(" Error: Could not open webcam. Please check your camera connection.")
     exit()
 
 detector = HandDetector(maxHands=1, detectionCon=0.8)
@@ -38,16 +38,16 @@ detector = HandDetector(maxHands=1, detectionCon=0.8)
 # Ask the user what gesture to collect
 label = input("Enter label name for the gesture you want to record (e.g., 'thumbs_up'): ")
 
-print("\n✅ Gesture capture started!")
-print("👉 Press 's' to save a frame")
-print("👉 Press 'q' to quit\n")
+print("\n Gesture capture started!")
+print(" Press 's' to save a frame")
+print(" Press 'q' to quit\n")
 
 frame_count = 0
 
 while True:
     success, img = cap.read()
     if not success:
-        print("⚠️ Warning: Failed to read frame from webcam")
+        print(" Warning: Failed to read frame from webcam")
         break
     
     hands, img = detector.findHands(img)
@@ -79,12 +79,12 @@ while True:
                 df = pd.DataFrame([row], columns=columns)
                 df.to_csv(CSV_FILENAME, mode='a', index=False, header=False)
                 frame_count += 1
-                print(f"✅ Frame {frame_count} saved for label: {label}")
+                print(f" Frame {frame_count} saved for label: {label}")
             except Exception as e:
-                print(f"❌ Error saving data: {e}")
+                print(f" Error saving data: {e}")
 
         elif key == ord('q'):
-            print(f"\n👋 Quitting. Total frames saved: {frame_count}")
+            print(f"\n Quitting. Total frames saved: {frame_count}")
             break
     else:
         cv2.putText(img, "Hand Not Detected", (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 0, 255), 2)
@@ -94,9 +94,9 @@ while True:
     
     # Also check for 'q' when no hand is detected
     if cv2.waitKey(1) & 0xFF == ord('q'):
-        print(f"\n👋 Quitting. Total frames saved: {frame_count}")
+        print(f"\n Quitting. Total frames saved: {frame_count}")
         break
 
 cap.release()
 cv2.destroyAllWindows()
-print("✅ Gesture capture session completed!")
+print(" Gesture capture session completed!")

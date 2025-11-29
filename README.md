@@ -1,4 +1,4 @@
-# 🖐️ Touchless Keyboard
+﻿#  Touchless Keyboard
 
 A hand gesture-controlled virtual keyboard using computer vision and hand tracking. Type without touching your keyboard using intuitive hand gestures detected through your webcam!
 
@@ -8,28 +8,28 @@ A hand gesture-controlled virtual keyboard using computer vision and hand tracki
 
 ---
 
-## ✨ Features
+##  Features
 
-- 🎯 **Touchless Typing** - Type using hand gestures, no physical contact needed
-- 👁️ **Real-time Hand Tracking** - Powered by MediaPipe and cvzone
-- ⌨️ **Full QWERTY Layout** - Complete keyboard with numbers, letters, and special keys
-- 🔊 **Audio Feedback** - Click sounds for better user experience
-- 📊 **Visual Feedback** - Distance indicators and click-ready alerts
-- 💾 **Save & Copy** - Save typed text to file or copy to clipboard
-- 🤖 **AI Version** - Dual-hand control with ML data collection
-- 📈 **Gesture Data Collection** - Build custom gesture recognition models
+-  **Touchless Typing** - Type using hand gestures, no physical contact needed
+-  **Real-time Hand Tracking** - Powered by MediaPipe and cvzone
+-  **Full QWERTY Layout** - Complete keyboard with numbers, letters, and special keys
+-  **Audio Feedback** - Click sounds for better user experience
+-  **Visual Feedback** - Distance indicators and click-ready alerts
+-  **Save & Copy** - Save typed text to file or copy to clipboard
+-  **AI Version** - Dual-hand control with ML data collection
+-  **Gesture Data Collection** - Build custom gesture recognition models
 
 ---
 
-## 🎮 Gesture Controls
+##  Gesture Controls
 
 ### Basic Gestures
 
 | Gesture | Action | Description |
 |---------|--------|-------------|
-| 👌 **Thumb + Index Pinch** | Click/Select | Bring thumb and index finger close together (< 50px) |
-| 🤏 **Thumb + Middle Pinch** | Exit | Bring thumb and middle finger together to close app |
-| 👆 **Index Finger Hover** | Navigate | Move index finger to hover over keys |
+|  **Thumb + Index Pinch** | Click/Select | Bring thumb and index finger close together (< 50px) |
+|  **Thumb + Middle Pinch** | Exit | Bring thumb and middle finger together to close app |
+|  **Index Finger Hover** | Navigate | Move index finger to hover over keys |
 
 ### Keyboard Shortcuts
 
@@ -41,7 +41,7 @@ A hand gesture-controlled virtual keyboard using computer vision and hand tracki
 
 ---
 
-## 📦 Installation
+##  Installation
 
 ### Prerequisites
 
@@ -76,7 +76,7 @@ pip install -r requirements.txt
 
 ---
 
-## 🚀 Usage
+##  Usage
 
 ### Basic Keyboard
 
@@ -128,20 +128,20 @@ Data is saved to `gesture_data.csv` with 21 hand landmarks (x, y, z coordinates)
 
 ---
 
-## 🎨 Keyboard Layout
+##  Keyboard Layout
 
 ```
-┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬────┐
-│ 1 │ 2 │ 3 │ 4 │ 5 │ 6 │ 7 │ 8 │ 9 │ 0 │ ← │
-├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-│ Q │ W │ E │ R │ T │ Y │ U │ I │ O │ P │ ! │
-├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-│ A │ S │ D │ F │ G │ H │ J │ K │ L │ ; │ ' │
-├───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-│ Z │ X │ C │ V │ B │ N │ M │ , │ . │ ? │   │
-├───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┤
-│              SPACE  │ ENTER │ TAB          │
-└─────────────────────┴───────┴──────────────┘
+
+ 1  2  3  4  5  6  7  8  9  0   
+
+ Q  W  E  R  T  Y  U  I  O  P  ! 
+
+ A  S  D  F  G  H  J  K  L  ;  ' 
+
+ Z  X  C  V  B  N  M  ,  .  ?    
+
+              SPACE   ENTER  TAB          
+
 ```
 
 **Special Keys:**
@@ -153,7 +153,7 @@ Data is saved to `gesture_data.csv` with 21 hand landmarks (x, y, z coordinates)
 
 ---
 
-## ⚙️ Configuration
+##  Configuration
 
 Edit `config.py` to customize:
 
@@ -174,7 +174,7 @@ FLASH_DURATION = 0.3       # Key flash duration (seconds)
 
 ---
 
-## 🛠️ Troubleshooting
+##  Troubleshooting
 
 ### Webcam Not Detected
 
@@ -230,24 +230,24 @@ FLASH_DURATION = 0.3       # Key flash duration (seconds)
 
 ---
 
-## 📊 Project Structure
+##  Project Structure
 
 ```
 Touchless-Keyboard/
-├── main.py                    # Basic single-hand keyboard
-├── virtual_keyboard_ai.py     # AI-enhanced dual-hand version
-├── collect_gesture_data.py    # ML data collection tool
-├── config.py                  # Configuration settings
-├── requirements.txt           # Python dependencies
-├── clickSound.mp3            # Audio feedback file
-├── gesture_data.csv          # ML training data (generated)
-├── .gitignore                # Git ignore patterns
-└── README.md                 # This file
+ main.py                    # Basic single-hand keyboard
+ virtual_keyboard_ai.py     # AI-enhanced dual-hand version
+ collect_gesture_data.py    # ML data collection tool
+ config.py                  # Configuration settings
+ requirements.txt           # Python dependencies
+ clickSound.mp3            # Audio feedback file
+ gesture_data.csv          # ML training data (generated)
+ .gitignore                # Git ignore patterns
+ README.md                 # This file
 ```
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 Contributions are welcome! Here's how you can help:
 
@@ -278,13 +278,13 @@ Contributions are welcome! Here's how you can help:
 
 ---
 
-## 📝 License
+##  License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - **MediaPipe** - Hand tracking technology
 - **cvzone** - Simplified hand detection
@@ -293,7 +293,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📧 Contact
+##  Contact
 
 For questions, suggestions, or issues:
 
@@ -302,13 +302,13 @@ For questions, suggestions, or issues:
 
 ---
 
-## 🌟 Star History
+##  Star History
 
-If you find this project useful, please consider giving it a ⭐ on GitHub!
+If you find this project useful, please consider giving it a  on GitHub!
 
 ---
 
-## 📸 Screenshots
+##  Screenshots
 
 ### Main Keyboard Interface
 ![Main Interface](screenshots/main_interface.png)
@@ -321,7 +321,7 @@ If you find this project useful, please consider giving it a ⭐ on GitHub!
 
 ---
 
-## 🎯 Roadmap
+##  Roadmap
 
 - [x] Basic gesture keyboard
 - [x] Dual-hand AI version
@@ -337,4 +337,4 @@ If you find this project useful, please consider giving it a ⭐ on GitHub!
 
 ---
 
-**Made with ❤️ and hand gestures**
+**Made with  and hand gestures**

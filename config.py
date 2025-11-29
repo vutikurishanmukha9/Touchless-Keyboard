@@ -1,4 +1,4 @@
-"""
+﻿"""
 Configuration file for Touchless Keyboard
 
 This module contains all configuration constants for the virtual keyboard,
