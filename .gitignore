@@ -23,6 +23,10 @@ __pycache__/
 # Generated Data
 gesture_data.csv
 
+# Audio Files
+clickSound.mp3
+
 # OS
 .DS_Store
 Thumbs.db
+
