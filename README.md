@@ -293,16 +293,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-##  Contact
-
-For questions, suggestions, or issues:
-
-- **GitHub Issues:** [Report a bug](https://github.com/yourusername/Touchless-Keyboard/issues)
-- **Email:** your.email@example.com
-
----
-
-##  Star History
+## 🌟 Star History
 
 If you find this project useful, please consider giving it a  on GitHub!
 
@@ -337,4 +328,4 @@ If you find this project useful, please consider giving it a  on GitHub!
 
 ---
 
-**Made with  and hand gestures**
+**Made with ❤️ and hand gestures**
