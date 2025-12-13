@@ -22,10 +22,12 @@ __pycache__/
 *.log
 
 # Generated Data
-gesture_data.csv
+data/*.csv
+!data/.gitkeep
 
-# Audio Files
-clickSound.mp3
+# Root-level generated files (legacy)
+gesture_data.csv
+calibration.json
 
 # OS
 .DS_Store

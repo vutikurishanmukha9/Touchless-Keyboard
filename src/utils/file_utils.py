@@ -8,7 +8,7 @@ with proper error handling.
 import pyperclip
 from datetime import datetime
 from typing import Optional
-from exceptions import FileOperationError, ClipboardError
+from src.utils.exceptions import FileOperationError, ClipboardError
 
 
 def save_text_to_file(text: str, filename: Optional[str] = None) -> bool:

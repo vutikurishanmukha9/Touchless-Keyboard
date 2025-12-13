@@ -16,9 +16,15 @@ from cvzone.HandTrackingModule import HandDetector
 import pandas as pd
 import os
 
-# Create or append to a CSV file
-CSV_FILENAME = "gesture_data.csv"
+# Create or append to a CSV file in data directory
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
+CSV_FILENAME = os.path.join(DATA_DIR, "gesture_data.csv")
 columns = [f"x{i},y{i},z{i}" for i in range(21)] + ["label"]
+
+# Ensure data directory exists
+os.makedirs(DATA_DIR, exist_ok=True)
 
 if not os.path.exists(CSV_FILENAME):
     df = pd.DataFrame(columns=columns)

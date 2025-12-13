@@ -83,7 +83,7 @@ pip install -r requirements.txt
 Run the standard single-hand virtual keyboard:
 
 ```bash
-python main.py
+python run.py
 ```
 
 **Features:**
@@ -97,7 +97,7 @@ python main.py
 Run the advanced dual-hand version with ML data collection:
 
 ```bash
-python virtual_keyboard_ai.py
+python run.py --ai
 ```
 
 **Features:**
@@ -116,7 +116,7 @@ python virtual_keyboard_ai.py
 Collect training data for custom gesture recognition:
 
 ```bash
-python collect_gesture_data.py
+python -m tools.collect_gesture_data
 ```
 
 1. Enter a gesture label (e.g., "thumbs_up", "peace_sign")
@@ -234,15 +234,28 @@ FLASH_DURATION = 0.3       # Key flash duration (seconds)
 
 ```
 Touchless-Keyboard/
- main.py                    # Basic single-hand keyboard
- virtual_keyboard_ai.py     # AI-enhanced dual-hand version
- collect_gesture_data.py    # ML data collection tool
- config.py                  # Configuration settings
- requirements.txt           # Python dependencies
- clickSound.mp3            # Audio feedback file
- gesture_data.csv          # ML training data (generated)
- .gitignore                # Git ignore patterns
- README.md                 # This file
+├── run.py                      # Main launcher script
+├── requirements.txt            # Python dependencies
+├── README.md                   # Documentation
+├── src/                        # Source code package
+│   ├── __init__.py
+│   ├── core/                   # Core application logic
+│   │   ├── gesture_handler.py  # Gesture detection classes
+│   │   └── keyboard_utils.py   # Keyboard rendering utilities
+│   ├── utils/                  # Utility modules
+│   │   ├── config.py           # Configuration settings
+│   │   ├── exceptions.py       # Custom exceptions
+│   │   ├── file_utils.py       # File/clipboard operations
+│   │   └── performance_monitor.py
+│   └── apps/                   # Application entry points
+│       ├── main.py             # Basic single-hand keyboard
+│       └── virtual_keyboard_ai.py
+├── tools/                      # Standalone tools
+│   └── collect_gesture_data.py # ML data collection
+├── assets/                     # Static assets
+│   └── clickSound.mp3          # Audio feedback
+└── data/                       # Generated data (gitignored)
+    └── gesture_data.csv        # ML training data
 ```
 
 ---

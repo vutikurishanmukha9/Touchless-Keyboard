@@ -20,16 +20,17 @@ import csv
 import os
 
 # Import shared modules
-from keyboard_utils import draw_key, generate_keyboard_layout, draw_text_bar, draw_rounded_rect
-from gesture_handler import GestureDetector, HandCalibration
-from file_utils import save_text_to_file, copy_to_clipboard
-from performance_monitor import FPSCounter
-from exceptions import WebcamError, AudioError, FileOperationError, ClipboardError
+from src.core.keyboard_utils import draw_key, generate_keyboard_layout, draw_text_bar, draw_rounded_rect
+from src.core.gesture_handler import GestureDetector, HandCalibration
+from src.utils.file_utils import save_text_to_file, copy_to_clipboard
+from src.utils.performance_monitor import FPSCounter
+from src.utils.exceptions import WebcamError, AudioError, FileOperationError, ClipboardError
 
 # === Sound Setup ===
 pygame.mixer.init()
 try:
-    click_sound = pygame.mixer.Sound("clickSound.mp3")
+    audio_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "clickSound.mp3")
+    click_sound = pygame.mixer.Sound(audio_path)
 except (pygame.error, FileNotFoundError):
     click_sound = None
     print(" Warning: clickSound.mp3 not found. Audio feedback disabled.")
@@ -38,7 +39,8 @@ except (pygame.error, FileNotFoundError):
 def save_landmark_data(lmList, label):
     """Save hand landmark data to CSV for ML training."""
     if lmList:
-        with open("gesture_data.csv", "a", newline="") as f:
+        data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "gesture_data.csv")
+        with open(data_path, "a", newline="") as f:
             writer = csv.writer(f)
             row = [coord for point in lmList for coord in point[:3]]  # x, y, z
             row.append(label)

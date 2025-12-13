@@ -9,7 +9,7 @@ import time
 import json
 from collections import deque
 from typing import List, Tuple, Optional, Dict
-from exceptions import CalibrationError
+from src.utils.exceptions import CalibrationError
 
 
 class GestureSmoothing:
