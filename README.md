@@ -10,12 +10,23 @@ A hand gesture-controlled virtual keyboard using computer vision and hand tracki
 
 ##  Features
 
+### Core Features
 -  **Touchless Typing** - Type using hand gestures, no physical contact needed
 -  **Real-time Hand Tracking** - Powered by MediaPipe and cvzone
 -  **Full QWERTY Layout** - Complete keyboard with numbers, letters, and special keys
 -  **Audio Feedback** - Click sounds for better user experience
 -  **Visual Feedback** - Distance indicators and click-ready alerts
+
+### Modern UI
+-  **Gradient Keys** - Beautiful gradient backgrounds with smooth colors
+-  **Glow Effects** - Glowing borders on hover for futuristic look
+-  **4 Color Themes** - Dark, Neon, Cyberpunk, Light (press 't' to cycle)
+-  **Responsive Layout** - Auto-scales keyboard based on screen resolution
+
+### Advanced Features
+-  **Shift Key** - Toggle lowercase/uppercase with SHIFT key
 -  **Save & Copy** - Save typed text to file or copy to clipboard
+-  **Structured Logging** - Professional logging with timestamps
 -  **AI Version** - Dual-hand control with ML data collection
 -  **Gesture Data Collection** - Build custom gesture recognition models
 
@@ -37,6 +48,7 @@ A hand gesture-controlled virtual keyboard using computer vision and hand tracki
 |-----|--------|
 | `S` | Save typed text to file |
 | `C` | Copy text to clipboard |
+| `T` | Cycle through color themes |
 | `ESC` | Exit application |
 
 ---
@@ -88,9 +100,11 @@ python run.py
 
 **Features:**
 - Single-hand operation
-- Click threshold: 50px
-- Click delay: 0.7s
-- Simple and intuitive
+- Modern gradient UI with glow effects
+- 4 color themes (Dark, Neon, Cyberpunk, Light)
+- Shift key for lowercase/uppercase
+- Responsive keyboard sizing
+- Click delay: 0.5s
 
 ### AI-Enhanced Keyboard
 
@@ -132,19 +146,20 @@ Data is saved to `gesture_data.csv` with 21 hand landmarks (x, y, z coordinates)
 
 ```
 
- 1  2  3  4  5  6  7  8  9  0   
+ SHIFT  1  2  3  4  5  6  7  8  9  0  <-
 
- Q  W  E  R  T  Y  U  I  O  P  ! 
+  Q  W  E  R  T  Y  U  I  O  P  !
 
- A  S  D  F  G  H  J  K  L  ;  ' 
+   A  S  D  F  G  H  J  K  L  ;  '
 
- Z  X  C  V  B  N  M  ,  .  ?    
+    Z  X  C  V  B  N  M  ,  .  ?
 
-              SPACE   ENTER  TAB          
+       SPACE      ENTER    TAB
 
 ```
 
 **Special Keys:**
+- `SHIFT` = Toggle case (auto-disables after letter)
 - `__` = Spacebar
 - `<-` = Backspace
 - `ENTER` = Enter/Return
@@ -155,7 +170,20 @@ Data is saved to `gesture_data.csv` with 21 hand landmarks (x, y, z coordinates)
 
 ##  Configuration
 
-Edit `config.py` to customize:
+### Color Themes
+
+Press `t` during runtime to cycle through themes:
+
+| Theme | Description |
+|-------|-------------|
+| **Dark** | Default dark mode with green accents |
+| **Neon** | Purple/magenta with cyan text |
+| **Cyberpunk** | Dark blue with gold/yellow |
+| **Light** | Light mode for bright environments |
+
+### Gesture Settings
+
+Edit `src/utils/config.py` to customize:
 
 ```python
 # Gesture thresholds
@@ -240,15 +268,17 @@ Touchless-Keyboard/
 ├── src/                        # Source code package
 │   ├── __init__.py
 │   ├── core/                   # Core application logic
-│   │   ├── gesture_handler.py  # Gesture detection classes
-│   │   └── keyboard_utils.py   # Keyboard rendering utilities
+│   │   ├── gesture_handler.py  # Gesture detection + calibration
+│   │   └── keyboard_utils.py   # Gradient keys, glow effects
 │   ├── utils/                  # Utility modules
 │   │   ├── config.py           # Configuration settings
 │   │   ├── exceptions.py       # Custom exceptions
 │   │   ├── file_utils.py       # File/clipboard operations
-│   │   └── performance_monitor.py
+│   │   ├── logging_config.py   # Structured logging
+│   │   ├── performance_monitor.py
+│   │   └── themes.py           # Color themes (Dark, Neon, etc.)
 │   └── apps/                   # Application entry points
-│       ├── main.py             # Basic single-hand keyboard
+│       ├── main.py             # Main keyboard with modern UI
 │       └── virtual_keyboard_ai.py
 ├── tools/                      # Standalone tools
 │   └── collect_gesture_data.py # ML data collection
