@@ -3,11 +3,12 @@ Keyboard rendering utilities for Touchless Keyboard.
 
 This module provides functions for drawing keyboard keys with modern UI effects
 including gradients, glow effects, and theme support.
+Includes gradient caching for improved performance.
 """
 
 import cv2
 import numpy as np
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Dict
 from src.utils.themes import get_theme, create_gradient
 
 # Keyboard layout configuration
@@ -19,22 +20,59 @@ KEYBOARD_SYMBOLS = [
     ['SHIFT', '__', 'ENTER', 'TAB']
 ]
 
+# === Gradient Cache ===
+# Cache gradients by (height, width, color_top, color_bottom) to avoid recreating them every frame
+_gradient_cache: Dict[tuple, np.ndarray] = {}
+_mask_cache: Dict[tuple, np.ndarray] = {}
+MAX_CACHE_SIZE = 100
+
+
+def _get_cached_gradient(h: int, w: int, color_top: tuple, color_bottom: tuple) -> np.ndarray:
+    """Get gradient from cache or create and cache it."""
+    key = (h, w, color_top, color_bottom)
+    
+    if key not in _gradient_cache:
+        # Clear cache if too large
+        if len(_gradient_cache) > MAX_CACHE_SIZE:
+            _gradient_cache.clear()
+        _gradient_cache[key] = create_gradient(h, w, color_top, color_bottom)
+    
+    return _gradient_cache[key]
+
+
+def _get_cached_mask(h: int, w: int, radius: int) -> np.ndarray:
+    """Get rounded rectangle mask from cache or create and cache it."""
+    key = (h, w, radius)
+    
+    if key not in _mask_cache:
+        if len(_mask_cache) > MAX_CACHE_SIZE:
+            _mask_cache.clear()
+        
+        mask = np.zeros((h, w), dtype=np.uint8)
+        cv2.rectangle(mask, (radius, 0), (w - radius, h), 255, -1)
+        cv2.rectangle(mask, (0, radius), (w, h - radius), 255, -1)
+        cv2.circle(mask, (radius, radius), radius, 255, -1)
+        cv2.circle(mask, (w - radius, radius), radius, 255, -1)
+        cv2.circle(mask, (radius, h - radius), radius, 255, -1)
+        cv2.circle(mask, (w - radius, h - radius), radius, 255, -1)
+        
+        _mask_cache[key] = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR) / 255.0
+    
+    return _mask_cache[key]
+
+
+def clear_gradient_cache():
+    """Clear gradient and mask caches (call when theme changes)."""
+    _gradient_cache.clear()
+    _mask_cache.clear()
+
 
 def draw_rounded_rect_gradient(img, top_left: Tuple[int, int], bottom_right: Tuple[int, int],
                                radius: int = 15, color_top: Tuple[int, int, int] = None,
                                color_bottom: Tuple[int, int, int] = None,
                                alpha: float = 0.85):
     """
-    Draw a rounded rectangle with vertical gradient.
-    
-    Args:
-        img: Input image to draw on
-        top_left: (x, y) coordinates of top-left corner
-        bottom_right: (x, y) coordinates of bottom-right corner
-        radius: Corner radius in pixels
-        color_top: Top gradient color (BGR)
-        color_bottom: Bottom gradient color (BGR)
-        alpha: Opacity (0.0 - 1.0)
+    Draw a rounded rectangle with vertical gradient (cached for performance).
     """
     theme = get_theme()
     if color_top is None:
@@ -47,20 +85,12 @@ def draw_rounded_rect_gradient(img, top_left: Tuple[int, int], bottom_right: Tup
     w = x2 - x1
     h = y2 - y1
     
-    # Create gradient for the key
-    gradient = create_gradient(h, w, color_top, color_bottom)
+    if w <= 0 or h <= 0:
+        return
     
-    # Create mask for rounded corners
-    mask = np.zeros((h, w), dtype=np.uint8)
-    cv2.rectangle(mask, (radius, 0), (w - radius, h), 255, -1)
-    cv2.rectangle(mask, (0, radius), (w, h - radius), 255, -1)
-    cv2.circle(mask, (radius, radius), radius, 255, -1)
-    cv2.circle(mask, (w - radius, radius), radius, 255, -1)
-    cv2.circle(mask, (radius, h - radius), radius, 255, -1)
-    cv2.circle(mask, (w - radius, h - radius), radius, 255, -1)
-    
-    # Apply mask to gradient
-    mask_3ch = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR) / 255.0
+    # Get cached gradient and mask
+    gradient = _get_cached_gradient(h, w, color_top, color_bottom)
+    mask_3ch = _get_cached_mask(h, w, radius)
     
     # Blend with original image
     roi = img[y1:y2, x1:x2]

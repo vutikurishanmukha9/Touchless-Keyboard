@@ -20,7 +20,7 @@ import sys
 # Import shared modules
 from src.core.keyboard_utils import (
     draw_key, generate_keyboard_layout, draw_text_bar, 
-    draw_status_bar, draw_glow_border
+    draw_status_bar, draw_glow_border, clear_gradient_cache
 )
 from src.core.gesture_handler import GestureDetector, HandCalibration
 from src.utils.file_utils import save_text_to_file, copy_to_clipboard
@@ -28,6 +28,7 @@ from src.utils.performance_monitor import FPSCounter
 from src.utils.exceptions import WebcamError, FileOperationError, ClipboardError
 from src.utils.themes import get_theme, set_theme, get_available_themes
 from src.utils.logging_config import log_info, log_warning, log_error
+from src.utils.settings import load_settings, update_setting
 from src.core.calibration import run_calibration_mode
 
 # === Configuration ===
@@ -66,7 +67,11 @@ def main():
     screen_width, screen_height = monitors[0].width, monitors[0].height
     
     # === State Variables ===
-    current_theme = 'dark'
+    # Load saved settings
+    user_settings = load_settings()
+    current_theme = user_settings.get('theme', 'dark')
+    set_theme(current_theme)  # Apply saved theme
+    
     available_themes = get_available_themes()
     typed_text = ""
     key_flash = {}
@@ -173,6 +178,8 @@ def main():
                 idx = available_themes.index(current_theme)
                 current_theme = available_themes[(idx + 1) % len(available_themes)]
                 set_theme(current_theme)
+                clear_gradient_cache()  # Clear cached gradients for new theme
+                update_setting('theme', current_theme)  # Save theme
                 notification_text = f"Theme: {current_theme.title()}"
                 notification_time = current_time
             elif key_press == ord('k'):
