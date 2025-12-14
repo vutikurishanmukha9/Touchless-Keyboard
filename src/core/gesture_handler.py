@@ -7,6 +7,8 @@ and hand calibration capabilities.
 
 import time
 import json
+import shutil
+from pathlib import Path
 from collections import deque
 from typing import List, Tuple, Optional, Dict
 from src.utils.exceptions import CalibrationError
@@ -154,27 +156,36 @@ class HandCalibration:
     
     def save_calibration(self, filename: str = "calibration.json"):
         """
-        Save calibration data to file.
+        Save calibration data to file with backup.
         
         Args:
             filename: Path to save calibration data
         """
         if not self.calibrated:
-            print(" No calibration data to save")
             return
+        
+        filepath = Path(filename)
+        
+        # Create backup of existing calibration
+        if filepath.exists():
+            backup_path = filepath.with_suffix('.json.bak')
+            try:
+                shutil.copy2(filepath, backup_path)
+            except Exception:
+                pass  # Backup is best-effort
         
         data = {
             'hand_size': self.hand_size,
             'click_threshold': self.click_threshold,
-            'exit_threshold': self.exit_threshold
+            'exit_threshold': self.exit_threshold,
+            'calibrated_at': time.strftime('%Y-%m-%d %H:%M:%S')
         }
         
         try:
-            with open(filename, 'w') as f:
+            with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2)
-            print(f" Calibration saved to {filename}")
-        except Exception as e:
-            print(f" Failed to save calibration: {e}")
+        except Exception:
+            pass  # Silent fail - calibration works without persistence
     
     def load_calibration(self, filename: str = "calibration.json") -> bool:
         """
@@ -186,22 +197,28 @@ class HandCalibration:
         Returns:
             True if load successful
         """
+        filepath = Path(filename)
+        
+        if not filepath.exists():
+            return False
+        
         try:
-            with open(filename, 'r') as f:
+            with open(filepath, 'r', encoding='utf-8') as f:
                 data = json.load(f)
+            
+            # Validate loaded data
+            if not all(k in data for k in ['hand_size', 'click_threshold', 'exit_threshold']):
+                return False
             
             self.hand_size = data['hand_size']
             self.click_threshold = data['click_threshold']
             self.exit_threshold = data['exit_threshold']
             self.calibrated = True
             
-            print(f" Calibration loaded from {filename}")
             return True
-        except FileNotFoundError:
-            print(f" Calibration file not found: {filename}")
+        except (json.JSONDecodeError, KeyError, TypeError):
             return False
-        except Exception as e:
-            print(f" Failed to load calibration: {e}")
+        except Exception:
             return False
 
 
