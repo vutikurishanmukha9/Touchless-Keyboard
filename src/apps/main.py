@@ -26,6 +26,7 @@ from src.utils.file_utils import save_text_to_file, copy_to_clipboard
 from src.utils.performance_monitor import FPSCounter
 from src.utils.exceptions import WebcamError, FileOperationError, ClipboardError
 from src.utils.themes import get_theme, set_theme, get_available_themes
+from src.utils.logging_config import log_info, log_warning, log_error
 
 # === Sound Setup ===
 pygame.mixer.init()
@@ -34,7 +35,7 @@ try:
     click_sound = pygame.mixer.Sound(audio_path)
 except (pygame.error, FileNotFoundError):
     click_sound = None
-    print(" Warning: clickSound.mp3 not found. Audio feedback disabled.")
+    log_warning("clickSound.mp3 not found. Audio feedback disabled.")
 
 # === Monitor Info ===
 monitors = get_monitors()
@@ -57,7 +58,18 @@ gesture_detector = GestureDetector(
 )
 
 fps_counter = FPSCounter(update_interval=1.0)
-keys = generate_keyboard_layout(start_x=40, start_y=90)
+
+# === Responsive Keyboard Layout ===
+# Calculate key size based on screen resolution
+base_key_size = min(screen_width // 18, screen_height // 12)
+key_size = max(60, min(95, base_key_size))  # Clamp between 60-95px
+key_gap = max(8, key_size // 10)
+start_x = 30
+start_y = 85
+
+keys = generate_keyboard_layout(start_x=start_x, start_y=start_y, 
+                                key_width=key_size, key_height=key_size, gap=key_gap)
+log_info(f"Keyboard layout: {key_size}px keys, gap {key_gap}px")
 
 # === Webcam Setup ===
 try:
@@ -67,7 +79,9 @@ try:
     
     if not cap.isOpened():
         raise WebcamError("Cannot access webcam. Please check camera permissions.")
+    log_info("Webcam initialized successfully")
 except Exception as e:
+    log_error(f"Webcam initialization failed: {e}")
     raise WebcamError(f"Webcam initialization failed: {e}")
 
 # === Hand Detector ===
@@ -82,14 +96,14 @@ shift_active = False
 hovered_key = None
 
 # === Main Loop ===
-print(" Touchless Keyboard started successfully!")
-print(" Modern UI with theme support")
-print(" Controls: 's' save | 'c' copy | 't' theme | ESC quit")
+log_info("Touchless Keyboard started successfully!")
+log_info("Modern UI with theme support")
+log_info("Controls: 's' save | 'c' copy | 't' theme | ESC quit")
 
 while True:
     success, img = cap.read()
     if not success:
-        print(" Warning: Failed to read frame")
+        log_warning("Failed to read frame")
         break
 
     hands, img = detector.findHands(img, draw=False)
