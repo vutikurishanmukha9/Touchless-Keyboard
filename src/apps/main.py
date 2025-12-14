@@ -27,6 +27,7 @@ from src.utils.performance_monitor import FPSCounter
 from src.utils.exceptions import WebcamError, FileOperationError, ClipboardError
 from src.utils.themes import get_theme, set_theme, get_available_themes
 from src.utils.logging_config import log_info, log_warning, log_error
+from src.core.calibration import run_calibration_mode
 
 # === Sound Setup ===
 pygame.mixer.init()
@@ -141,8 +142,17 @@ while True:
         set_theme(current_theme)
         notification_text = f"Theme: {current_theme.title()}"
         notification_time = current_time
+    elif key_press == ord('k'):
+        # Run calibration mode
+        log_info("Entering calibration mode...")
+        new_calibration = run_calibration_mode(cap, screen_width, screen_height)
+        if new_calibration:
+            calibration = new_calibration
+            gesture_detector.calibration = calibration
+            notification_text = "Calibration saved!"
+            notification_time = time.time()
     elif key_press & 0xFF == 27:
-        print(" ESC pressed. Closing...")
+        log_info("ESC pressed. Closing...")
         break
 
     if hands:

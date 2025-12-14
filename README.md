@@ -49,6 +49,7 @@ A hand gesture-controlled virtual keyboard using computer vision and hand tracki
 | `S` | Save typed text to file |
 | `C` | Copy text to clipboard |
 | `T` | Cycle through color themes |
+| `K` | Start calibration mode |
 | `ESC` | Exit application |
 
 ---
