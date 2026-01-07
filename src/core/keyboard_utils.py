@@ -11,14 +11,45 @@ import numpy as np
 from typing import List, Tuple, Optional, Dict
 from src.utils.themes import get_theme, create_gradient
 
-# Keyboard layout configuration
+# Keyboard layout configurations
 KEYBOARD_SYMBOLS = [
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '<-'],
     ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '!'],
-    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', "'"],
-    ['Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '?'],
-    ['SHIFT', '__', 'ENTER', 'TAB']
+    ['CAPS', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';'],
+    ['SHIFT', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '?'],
+    ['__', 'ENTER', 'TAB', 'NUM']
 ]
+
+# Numeric keypad layout
+NUMPAD_SYMBOLS = [
+    ['7', '8', '9', '/'],
+    ['4', '5', '6', '*'],
+    ['1', '2', '3', '-'],
+    ['0', '.', '<-', '+'],
+    ['ENTER', 'ABC']
+]
+
+# Current layout mode
+_current_layout = 'qwerty'  # 'qwerty' or 'numpad'
+
+
+def get_current_layout() -> str:
+    """Get current keyboard layout mode."""
+    return _current_layout
+
+
+def set_layout(layout: str):
+    """Set keyboard layout mode ('qwerty' or 'numpad')."""
+    global _current_layout
+    if layout in ('qwerty', 'numpad'):
+        _current_layout = layout
+
+
+def toggle_layout():
+    """Toggle between QWERTY and numpad layouts."""
+    global _current_layout
+    _current_layout = 'numpad' if _current_layout == 'qwerty' else 'qwerty'
+    return _current_layout
 
 # === Gradient Cache ===
 # Cache gradients by (height, width, color_top, color_bottom) to avoid recreating them every frame
@@ -205,7 +236,7 @@ def draw_rounded_rect(img, top_left: Tuple[int, int], bottom_right: Tuple[int, i
 
 def generate_keyboard_layout(start_x: int = 50, start_y: int = 100,
                             key_width: int = 85, key_height: int = 85,
-                            gap: int = 12) -> List[Tuple[int, int, int, int, str]]:
+                            gap: int = 12, layout: str = None) -> List[Tuple[int, int, int, int, str]]:
     """
     Generate keyboard key positions and dimensions.
     
@@ -215,15 +246,20 @@ def generate_keyboard_layout(start_x: int = 50, start_y: int = 100,
         key_width: Width of standard keys
         key_height: Height of keys
         gap: Gap between keys
+        layout: 'qwerty' or 'numpad' (uses current if None)
     
     Returns:
         List of tuples: (x, y, width, height, label)
     """
+    if layout is None:
+        layout = _current_layout
+    
+    symbols = KEYBOARD_SYMBOLS if layout == 'qwerty' else NUMPAD_SYMBOLS
     keys = []
     
-    for row_index, row in enumerate(KEYBOARD_SYMBOLS):
-        # Center each row with staggered offset
-        row_offset = row_index * 25
+    for row_index, row in enumerate(symbols):
+        # Center each row with staggered offset (only for qwerty)
+        row_offset = row_index * 25 if layout == 'qwerty' else 0
         y = start_y + row_index * (key_height + gap)
         
         for col_index, key in enumerate(row):
@@ -232,9 +268,9 @@ def generate_keyboard_layout(start_x: int = 50, start_y: int = 100,
             # Make special keys wider
             if key == '__':
                 w = int(key_width * 2.5)
-            elif key in ['ENTER', 'SHIFT']:
+            elif key in ['ENTER', 'SHIFT', 'CAPS']:
                 w = int(key_width * 1.5)
-            elif key == 'TAB':
+            elif key in ['TAB', 'NUM', 'ABC']:
                 w = int(key_width * 1.2)
             else:
                 w = key_width

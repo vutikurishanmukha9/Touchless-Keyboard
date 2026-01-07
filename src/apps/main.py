@@ -20,7 +20,8 @@ import sys
 # Import shared modules
 from src.core.keyboard_utils import (
     draw_key, generate_keyboard_layout, draw_text_bar, 
-    draw_status_bar, draw_glow_border, clear_gradient_cache
+    draw_status_bar, draw_glow_border, clear_gradient_cache,
+    toggle_layout, get_current_layout
 )
 from src.core.gesture_handler import GestureDetector, HandCalibration
 from src.utils.file_utils import save_text_to_file, copy_to_clipboard
@@ -78,10 +79,12 @@ def main():
     notification_text = ""
     notification_time = 0
     shift_active = False
+    caps_lock = False  # Caps lock toggle state
     hovered_key = None
     last_cleanup_time = time.time()
-    exit_gesture_start = None  # For debounced exit
+    exit_gesture_start = None
     last_frame_time = time.time()
+    keyboard_scale = 1.0  # Keyboard scaling (0.8 - 1.5)
     
     # === Initialize Components ===
     calibration = HandCalibration()
@@ -190,6 +193,35 @@ def main():
                     gesture_detector.calibration = calibration
                     notification_text = "Calibration saved!"
                     notification_time = time.time()
+            elif key_press == ord('n'):
+                # Toggle numpad layout
+                new_layout = toggle_layout()
+                keys = generate_keyboard_layout(start_x=30, start_y=85, 
+                                                key_width=int(key_size * keyboard_scale), 
+                                                key_height=int(key_size * keyboard_scale), 
+                                                gap=key_gap)
+                notification_text = f"Layout: {new_layout.upper()}"
+                notification_time = current_time
+            elif key_press == ord('=') or key_press == ord('+'):
+                # Increase keyboard size
+                if keyboard_scale < 1.5:
+                    keyboard_scale = min(1.5, keyboard_scale + 0.1)
+                    keys = generate_keyboard_layout(start_x=30, start_y=85, 
+                                                    key_width=int(key_size * keyboard_scale), 
+                                                    key_height=int(key_size * keyboard_scale), 
+                                                    gap=key_gap)
+                    notification_text = f"Scale: {keyboard_scale:.1f}x"
+                    notification_time = current_time
+            elif key_press == ord('-'):
+                # Decrease keyboard size
+                if keyboard_scale > 0.8:
+                    keyboard_scale = max(0.8, keyboard_scale - 0.1)
+                    keys = generate_keyboard_layout(start_x=30, start_y=85, 
+                                                    key_width=int(key_size * keyboard_scale), 
+                                                    key_height=int(key_size * keyboard_scale), 
+                                                    gap=key_gap)
+                    notification_text = f"Scale: {keyboard_scale:.1f}x"
+                    notification_time = current_time
             elif key_press & 0xFF == 27:
                 log_info("ESC pressed. Exiting...")
                 break
@@ -271,10 +303,38 @@ def main():
                             elif label == 'TAB':
                                 pyautogui.press('tab')
                                 typed_text += '\t'
+                            elif label == 'CAPS':
+                                caps_lock = not caps_lock
+                                notification_text = "CAPS: ON" if caps_lock else "CAPS: OFF"
+                                notification_time = current_time
+                            elif label == 'NUM':
+                                new_layout = toggle_layout()
+                                keys = generate_keyboard_layout(start_x=30, start_y=85, 
+                                                                key_width=int(key_size * keyboard_scale), 
+                                                                key_height=int(key_size * keyboard_scale), 
+                                                                gap=key_gap)
+                                notification_text = "Numpad Mode"
+                                notification_time = current_time
+                            elif label == 'ABC':
+                                new_layout = toggle_layout()
+                                keys = generate_keyboard_layout(start_x=30, start_y=85, 
+                                                                key_width=int(key_size * keyboard_scale), 
+                                                                key_height=int(key_size * keyboard_scale), 
+                                                                gap=key_gap)
+                                notification_text = "QWERTY Mode"
+                                notification_time = current_time
+                            elif label in ['+', '-', '*', '/']:
+                                # Numpad operators
+                                pyautogui.press(label)
+                                typed_text += label
                             else:
-                                char = label.lower() if not shift_active else label
-                                pyautogui.press(char)
-                                typed_text += char if not shift_active else label
+                                # Regular character - apply caps/shift logic
+                                use_upper = caps_lock or shift_active
+                                char = label.upper() if use_upper else label.lower()
+                                pyautogui.press(char.lower())  # pyautogui uses lowercase
+                                typed_text += char
+                                
+                                # SHIFT auto-disables, CAPS persists
                                 if shift_active and label.isalpha():
                                     shift_active = False
                             
