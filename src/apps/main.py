@@ -60,6 +60,80 @@ def cleanup_key_flash(key_flash: dict, current_time: float, max_age: float = 2.0
     return {k: v for k, v in key_flash.items() if current_time - v < max_age}
 
 
+class TextHistory:
+    """Manages text history for undo/redo functionality."""
+    
+    def __init__(self, max_history: int = 50):
+        self.history = [""]
+        self.position = 0
+        self.max_history = max_history
+    
+    def push(self, text: str):
+        """Add new text state to history."""
+        # Remove any redo states
+        self.history = self.history[:self.position + 1]
+        self.history.append(text)
+        
+        # Limit history size
+        if len(self.history) > self.max_history:
+            self.history.pop(0)
+        else:
+            self.position += 1
+    
+    def undo(self) -> str:
+        """Undo to previous state."""
+        if self.position > 0:
+            self.position -= 1
+        return self.history[self.position]
+    
+    def redo(self) -> str:
+        """Redo to next state."""
+        if self.position < len(self.history) - 1:
+            self.position += 1
+        return self.history[self.position]
+    
+    def current(self) -> str:
+        """Get current text state."""
+        return self.history[self.position]
+
+
+def draw_help_overlay(img, screen_width: int, screen_height: int):
+    """Draw semi-transparent help overlay with keyboard controls."""
+    # Semi-transparent background
+    overlay = img.copy()
+    cv2.rectangle(overlay, (50, 50), (screen_width - 50, screen_height - 100), (20, 20, 20), -1)
+    cv2.addWeighted(overlay, 0.9, img, 0.1, 0, img)
+    
+    # Title
+    cv2.putText(img, "KEYBOARD SHORTCUTS", (screen_width // 2 - 180, 100),
+               cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0, 255, 255), 2)
+    
+    # Controls list
+    controls = [
+        ("ESC", "Exit application"),
+        ("h", "Toggle this help"),
+        ("s", "Save text to file"),
+        ("c", "Copy text to clipboard"),
+        ("t", "Cycle themes"),
+        ("n", "Toggle numpad"),
+        ("k", "Calibrate gestures"),
+        ("+/-", "Scale keyboard size"),
+        ("u", "Undo"),
+        ("r", "Redo"),
+        ("[/]", "Adjust volume"),
+    ]
+    
+    y = 160
+    for key, desc in controls:
+        cv2.putText(img, f"{key:>6}", (100, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (100, 255, 100), 2)
+        cv2.putText(img, f"  {desc}", (200, y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 200), 1)
+        y += 40
+    
+    # Footer
+    cv2.putText(img, "Press 'h' to close", (screen_width // 2 - 100, screen_height - 130),
+               cv2.FONT_HERSHEY_SIMPLEX, 0.7, (150, 150, 150), 1)
+
+
 def main():
     """Main application entry point with proper resource management."""
     
@@ -79,12 +153,19 @@ def main():
     notification_text = ""
     notification_time = 0
     shift_active = False
-    caps_lock = False  # Caps lock toggle state
+    caps_lock = False
     hovered_key = None
     last_cleanup_time = time.time()
     exit_gesture_start = None
     last_frame_time = time.time()
-    keyboard_scale = 1.0  # Keyboard scaling (0.8 - 1.5)
+    keyboard_scale = 1.0
+    help_visible = False  # Help overlay toggle
+    volume = 0.7  # Sound volume (0.0 - 1.0)
+    text_history = TextHistory(max_history=50)  # Undo/redo
+    
+    # Show theme on startup
+    notification_text = f"Theme: {current_theme.title()} | Press 'h' for help"
+    notification_time = time.time()
     
     # === Initialize Components ===
     calibration = HandCalibration()
@@ -222,6 +303,28 @@ def main():
                                                     gap=key_gap)
                     notification_text = f"Scale: {keyboard_scale:.1f}x"
                     notification_time = current_time
+            elif key_press == ord('h'):
+                help_visible = not help_visible
+            elif key_press == ord('u'):
+                typed_text = text_history.undo()
+                notification_text = "Undo"
+                notification_time = current_time
+            elif key_press == ord('r'):
+                typed_text = text_history.redo()
+                notification_text = "Redo"
+                notification_time = current_time
+            elif key_press == ord(']'):
+                if volume < 1.0:
+                    volume = min(1.0, volume + 0.1)
+                    if click_sound: click_sound.set_volume(volume)
+                    notification_text = f"Vol: {int(volume*100)}%"
+                    notification_time = current_time
+            elif key_press == ord('['):
+                if volume > 0.0:
+                    volume = max(0.0, volume - 0.1)
+                    if click_sound: click_sound.set_volume(volume)
+                    notification_text = f"Vol: {int(volume*100)}%"
+                    notification_time = current_time
             elif key_press & 0xFF == 27:
                 log_info("ESC pressed. Exiting...")
                 break
@@ -293,15 +396,20 @@ def main():
                                 notification_time = current_time
                             elif label == '__':
                                 pyautogui.press('space')
+                                text_history.push(typed_text + ' ')
                                 typed_text += ' '
                             elif label == '<-':
                                 pyautogui.press('backspace')
-                                typed_text = typed_text[:-1] if typed_text else ''
+                                if typed_text:
+                                    text_history.push(typed_text[:-1])
+                                    typed_text = typed_text[:-1]
                             elif label == 'ENTER':
                                 pyautogui.press('enter')
+                                text_history.push(typed_text + '\n')
                                 typed_text += '\n'
                             elif label == 'TAB':
                                 pyautogui.press('tab')
+                                text_history.push(typed_text + '\t')
                                 typed_text += '\t'
                             elif label == 'CAPS':
                                 caps_lock = not caps_lock
@@ -326,12 +434,14 @@ def main():
                             elif label in ['+', '-', '*', '/']:
                                 # Numpad operators
                                 pyautogui.press(label)
+                                text_history.push(typed_text + label)
                                 typed_text += label
                             else:
                                 # Regular character - apply caps/shift logic
                                 use_upper = caps_lock or shift_active
                                 char = label.upper() if use_upper else label.lower()
                                 pyautogui.press(char.lower())  # pyautogui uses lowercase
+                                text_history.push(typed_text + char)
                                 typed_text += char
                                 
                                 # SHIFT auto-disables, CAPS persists
@@ -362,8 +472,12 @@ def main():
             notif = notification_text if current_time - notification_time < 2.0 else ""
             draw_status_bar(img, int(current_fps), current_theme, screen_width, screen_height, notif)
             
-            cv2.putText(img, "'s' save | 'c' copy | 't' theme | 'k' calibrate | ESC exit", 
+            
+            cv2.putText(img, "Press 'h' for help | ESC to exit", 
                        (15, screen_height - 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (180, 180, 180), 1)
+            
+            if help_visible:
+                draw_help_overlay(img, screen_width, screen_height)
             
             cv2.imshow("Touchless Keyboard", img)
             

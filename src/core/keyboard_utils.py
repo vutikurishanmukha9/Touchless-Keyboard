@@ -284,13 +284,7 @@ def draw_text_bar(img, text: str, screen_width: int, y_pos: int = 20,
                   theme_name: str = None):
     """
     Draw the text preview bar at the top of the screen.
-    
-    Args:
-        img: Image to draw on
-        text: Text to display
-        screen_width: Screen width for calculating bar width
-        y_pos: Y position of the bar
-        theme_name: Optional theme override
+    Shows last ~70 characters with scroll indicator if truncated.
     """
     theme = get_theme(theme_name)
     text_bar_width = int(screen_width * 0.85)
@@ -301,16 +295,24 @@ def draw_text_bar(img, text: str, screen_width: int, y_pos: int = 20,
                                radius=10, color_top=theme['text_bar_bg'],
                                color_bottom=tuple(max(0, c - 20) for c in theme['text_bar_bg']))
     
-    # Display text (replace newlines/tabs with spaces for display)
-    display_text = text.replace('\n', ' ').replace('\t', '    ')
+    # Display text (replace newlines/tabs for display)
+    display_text = text.replace('\n', '↵ ').replace('\t', '→   ')
     
-    # Truncate to fit
-    max_chars = 50
-    if len(display_text) > max_chars:
-        display_text = '...' + display_text[-(max_chars - 3):]
+    # Calculate max chars based on screen width
+    max_chars = min(70, text_bar_width // 14)
+    is_truncated = len(display_text) > max_chars
     
-    cv2.putText(img, display_text, (55, y_pos + 40),
-               cv2.FONT_HERSHEY_SIMPLEX, 1.2, theme['text_bar_text'], 2)
+    if is_truncated:
+        display_text = '◀ ' + display_text[-(max_chars - 2):]
+    
+    # Main text
+    cv2.putText(img, display_text, (55, y_pos + 38),
+               cv2.FONT_HERSHEY_SIMPLEX, 0.9, theme['text_bar_text'], 2)
+    
+    # Character count (top right of bar)
+    char_count = f"{len(text)} chars"
+    cv2.putText(img, char_count, (text_bar_width - 80, y_pos + 20),
+               cv2.FONT_HERSHEY_SIMPLEX, 0.4, (150, 150, 150), 1)
 
 
 def draw_status_bar(img, fps: int, theme_name: str, screen_width: int,

@@ -150,12 +150,76 @@ class TestKeyboardUtils:
         first_key = keys[0]
         assert len(first_key) == 5
     
+    
     def test_clear_gradient_cache(self):
         """Test that cache clearing doesn't raise."""
         from src.core.keyboard_utils import clear_gradient_cache
-        
-        # Should not raise
         clear_gradient_cache()
+    
+    def test_layout_toggling(self):
+        """Test toggling between qwerty and numpad."""
+        from src.core.keyboard_utils import toggle_layout, get_current_layout, set_layout
+        
+        # Reset to known state
+        set_layout('qwerty')
+        assert get_current_layout() == 'qwerty'
+        
+        # Toggle to numpad
+        toggle_layout()
+        assert get_current_layout() == 'numpad'
+        
+        # Toggle back
+        toggle_layout()
+        assert get_current_layout() == 'qwerty'
+
+
+class TestTextHistory:
+    """Tests for undo/redo functionality."""
+    
+    def test_history_push_undo_redo(self):
+        """Test basic push, undo, and redo operations."""
+        from src.apps.main import TextHistory
+        
+        history = TextHistory()
+        assert history.current() == ""
+        
+        history.push("A")
+        assert history.current() == "A"
+        
+        history.push("AB")
+        assert history.current() == "AB"
+        
+        # Undo
+        assert history.undo() == "A"
+        assert history.undo() == ""
+        # Undo at start should stay at start
+        assert history.undo() == ""
+        
+        # Redo
+        assert history.redo() == "A"
+        assert history.redo() == "AB"
+        # Redo at end should stay at end
+        assert history.redo() == "AB"
+    
+    def test_push_clears_redo_stack(self):
+        """Test that pushing new text clears the redo stack."""
+        from src.apps.main import TextHistory
+        
+        history = TextHistory()
+        history.push("A")
+        history.push("B")
+        
+        history.undo() # Back to A
+        assert history.current() == "A"
+        
+        history.push("C") # Branch off: A -> C
+        assert history.current() == "C"
+        
+        # Should not be able to redo to B
+        assert history.redo() == "C"
+        
+        # Undo should go back to A
+        assert history.undo() == "A"
 
 
 if __name__ == "__main__":
