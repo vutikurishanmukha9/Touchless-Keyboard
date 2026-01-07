@@ -17,9 +17,22 @@ DEFAULT_SETTINGS = {
     'flash_duration': 0.25,
     'exit_hold_time': 1.5,
     'target_fps': 30,
+    'log_to_file': False,
+    'smoothing_factor': 0.5,
+    'high_contrast': False,
 }
 
 SETTINGS_FILE = Path.home() / '.touchless_keyboard' / 'settings.json'
+LOG_FILE = Path.home() / '.touchless_keyboard' / 'app.log'
+
+
+def get_log_file_path() -> Optional[str]:
+    """Get log file path if logging is enabled."""
+    settings = load_settings()
+    if settings.get('log_to_file'):
+        _ensure_config_dir()
+        return str(LOG_FILE)
+    return None
 
 
 def _ensure_config_dir() -> bool:

@@ -145,7 +145,17 @@ def main():
     # Load saved settings
     user_settings = load_settings()
     current_theme = user_settings.get('theme', 'dark')
-    set_theme(current_theme)  # Apply saved theme
+    set_theme(current_theme)
+    
+    # Setup logging
+    from src.utils.settings import get_log_file_path, get_setting
+    from src.utils.logging_config import setup_logger
+    import logging
+    
+    log_file = get_log_file_path()
+    setup_logger(log_file=log_file)
+    if log_file:
+        log_info(f"Logging to file: {log_file}")
     
     available_themes = get_available_themes()
     typed_text = ""
@@ -159,9 +169,9 @@ def main():
     exit_gesture_start = None
     last_frame_time = time.time()
     keyboard_scale = 1.0
-    help_visible = False  # Help overlay toggle
-    volume = 0.7  # Sound volume (0.0 - 1.0)
-    text_history = TextHistory(max_history=50)  # Undo/redo
+    help_visible = False
+    volume = 0.7
+    text_history = TextHistory(max_history=50)
     
     # Show theme on startup
     notification_text = f"Theme: {current_theme.title()} | Press 'h' for help"
@@ -172,8 +182,9 @@ def main():
     calibration.load_calibration()
     
     gesture_detector = GestureDetector(
-        click_delay=0.5,
+        click_delay=user_settings.get('click_delay', 0.5),
         use_smoothing=True,
+        smoothing_factor=user_settings.get('smoothing_factor', 0.5),
         calibration=calibration
     )
     

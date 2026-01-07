@@ -66,6 +66,20 @@ THEMES = {
         'indicator_ready': (50, 180, 50), # Green
         'indicator_wait': (255, 150, 50), # Orange
     },
+    'high_contrast': {
+        'name': 'High Contrast',
+        'key_bg': (0, 0, 0),              # Pure Black
+        'key_bg_gradient': (0, 0, 0),     # Pure Black
+        'key_hover': (255, 255, 255),     # Pure White
+        'key_pressed': (0, 255, 255),     # Yellow
+        'key_text': (255, 255, 255),      # Pure White
+        'glow_color': (255, 255, 0),      # Yellow glow
+        'text_bar_bg': (0, 0, 0),         # Pure Black
+        'text_bar_text': (255, 255, 0),   # Yellow
+        'hand_bbox': (255, 255, 255),     # White
+        'indicator_ready': (0, 255, 0),   # Green
+        'indicator_wait': (255, 0, 0),    # Red
+    },
 }
 
 # Current active theme

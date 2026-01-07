@@ -44,7 +44,9 @@ def setup_logger(name: str = "touchless_keyboard",
     
     # File handler (optional)
     if log_file:
-        file_handler = logging.FileHandler(log_file)
+        from logging.handlers import RotatingFileHandler
+        # 1MB max size, keep 3 backup files
+        file_handler = RotatingFileHandler(log_file, maxBytes=1024*1024, backupCount=3)
         file_handler.setLevel(level)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)

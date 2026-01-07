@@ -18,6 +18,7 @@ import os
 import sys
 import csv
 from pathlib import Path
+import logging
 
 # Import shared modules
 from src.core.keyboard_utils import (
@@ -30,8 +31,8 @@ from src.utils.file_utils import save_text_to_file, copy_to_clipboard, sanitize_
 from src.utils.performance_monitor import FPSCounter
 from src.utils.exceptions import WebcamError, FileOperationError, ClipboardError
 from src.utils.themes import get_theme, set_theme, get_available_themes
-from src.utils.logging_config import log_info, log_warning, log_error
-from src.utils.settings import load_settings, update_setting
+from src.utils.logging_config import log_info, log_warning, log_error, setup_logger
+from src.utils.settings import load_settings, update_setting, get_log_file_path
 from src.core.calibration import run_calibration_mode
 
 # === Configuration ===
@@ -122,7 +123,7 @@ def draw_help_overlay(img, screen_width: int, screen_height: int):
         ("l + gesture", "Log gesture data (AI Mode)"),
         ("s", "Save text"),
         ("c", "Copy text"),
-        ("t", "Theme"),
+        ("t", "Cycle theme (try High Contrast)"),
         ("n", "Numpad"),
         ("k", "Calibrate"),
         ("+/-", "Scale keyboard"),
@@ -145,9 +146,16 @@ def main():
     monitors = get_monitors()
     screen_width, screen_height = monitors[0].width, monitors[0].height
     
+    # Load settings & Setup Logging
     user_settings = load_settings()
     current_theme = user_settings.get('theme', 'dark')
     set_theme(current_theme)
+    
+    log_file = get_log_file_path()
+    setup_logger(log_file=log_file)
+    if log_file:
+        log_info(f"Logging to file: {log_file}")
+    
     available_themes = get_available_themes()
     
     typed_text = ""
@@ -169,7 +177,12 @@ def main():
     calibration = HandCalibration()
     calibration.load_calibration()
     
-    gesture_detector = GestureDetector(click_delay=0.5, use_smoothing=True, calibration=calibration)
+    gesture_detector = GestureDetector(
+        click_delay=user_settings.get('click_delay', 0.5),
+        use_smoothing=True,
+        smoothing_factor=user_settings.get('smoothing_factor', 0.5),
+        calibration=calibration
+    )
     fps_counter = FPSCounter(update_interval=1.0)
     
     key_size = max(60, min(95, min(screen_width // 18, screen_height // 12)))

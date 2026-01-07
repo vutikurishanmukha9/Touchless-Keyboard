@@ -16,33 +16,39 @@ from src.utils.exceptions import CalibrationError
 
 class GestureSmoothing:
     """
-    Smooth gesture distance measurements using moving average filter.
+    Smooth gesture distance measurements using exponential moving average.
     
     Reduces jitter from hand tremor and improves gesture stability.
     """
     
-    def __init__(self, window_size: int = 5):
+    def __init__(self, smoothing_factor: float = 0.5):
         """
         Initialize gesture smoothing.
         
         Args:
-            window_size: Number of frames to average (default: 5)
+            smoothing_factor: Weight for new value (0.0 to 1.0)
+                            Lower = smoother/slower, Higher = responsive/jittery
+                            Default 0.5 balances both.
         """
-        self.window_size = window_size
-        self.distances = deque(maxlen=window_size)
+        self.alpha = max(0.1, min(0.9, smoothing_factor))
+        self.smoothed_value = None
     
-    def smooth(self, distance: float) -> float:
+    def smooth(self, value: float) -> float:
         """
-        Add new distance and return smoothed value.
+        Add new value and return smoothed result.
         
         Args:
-            distance: Current distance measurement
+            value: Current measurement
         
         Returns:
-            Smoothed distance (moving average)
+            Smoothed value (exponential moving average)
         """
-        self.distances.append(distance)
-        return sum(self.distances) / len(self.distances)
+        if self.smoothed_value is None:
+            self.smoothed_value = value
+        else:
+            self.smoothed_value = (self.alpha * value) + ((1 - self.alpha) * self.smoothed_value)
+        
+        return self.smoothed_value
     
     def reset(self):
         """Clear the smoothing buffer."""
@@ -230,7 +236,9 @@ class GestureDetector:
     smoothing, and debouncing.
     """
     
+    
     def __init__(self, click_delay: float = 0.7, use_smoothing: bool = True,
+                 smoothing_factor: float = 0.5,
                  calibration: Optional[HandCalibration] = None):
         """
         Initialize gesture detector.
@@ -238,15 +246,20 @@ class GestureDetector:
         Args:
             click_delay: Minimum time between clicks (seconds)
             use_smoothing: Enable gesture smoothing
-            calibration: HandCalibration instance (creates default if None)
+            smoothing_factor: Exponential smoothing alpha (0.1 to 0.9)
+            calibration: HandCalibration instance
         """
         self.click_delay = click_delay
         self.last_click_time = 0
         self.use_smoothing = use_smoothing
         
         # Initialize smoothing
-        self.click_smoother = GestureSmoothing(window_size=5) if use_smoothing else None
-        self.exit_smoother = GestureSmoothing(window_size=5) if use_smoothing else None
+        if use_smoothing:
+            self.click_smoother = GestureSmoothing(smoothing_factor)
+            self.exit_smoother = GestureSmoothing(smoothing_factor)
+        else:
+            self.click_smoother = None
+            self.exit_smoother = None
         
         # Initialize calibration
         self.calibration = calibration if calibration else HandCalibration()
