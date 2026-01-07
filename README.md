@@ -24,11 +24,12 @@ A hand gesture-controlled virtual keyboard using computer vision and hand tracki
 -  **Responsive Layout** - Auto-scales keyboard based on screen resolution
 
 ### Advanced Features
--  **Shift Key** - Toggle lowercase/uppercase with SHIFT key
+-  **Smart Typing** - Caps Lock, NumPad, Undo/Redo support
+-  **Accessibility** - High Contrast theme and adjustable keyboard size
+-  **Helper Tools** - On-screen help overlay and volume control
 -  **Save & Copy** - Save typed text to file or copy to clipboard
--  **Structured Logging** - Professional logging with timestamps
+-  **Structured Logging** - Rotating file logs for debugging
 -  **AI Version** - Dual-hand control with ML data collection
--  **Gesture Data Collection** - Build custom gesture recognition models
 
 ---
 
@@ -46,9 +47,14 @@ A hand gesture-controlled virtual keyboard using computer vision and hand tracki
 
 | Key | Action |
 |-----|--------|
+| `H` | Toggle help overlay |
+| `N` | Toggle NumPad / QWERTY layout |
 | `S` | Save typed text to file |
 | `C` | Copy text to clipboard |
 | `T` | Cycle through color themes |
+| `U` / `R` | Undo / Redo typing |
+| `+` / `-` | Increase / Decrease keyboard size |
+| `[` / `]` | Decrease / Increase volume |
 | `K` | Start calibration mode |
 | `ESC` | Exit application |
 
@@ -145,27 +151,32 @@ Data is saved to `gesture_data.csv` with 21 hand landmarks (x, y, z coordinates)
 
 ##  Keyboard Layout
 
+The keyboard adapts based on the active mode (QWERTY or NumPad).
+
+**QWERTY Mode (Standard):**
+```
+ CAPS   1  2  3  4  5  6  7  8  9  0  <-
+  Q  W  E  R  T  Y  U  I  O  P  [  ]
+   A  S  D  F  G  H  J  K  L  ;  '
+    Z  X  C  V  B  N  M  ,  .  ?
+       SPACE      ENTER    TAB
 ```
 
- SHIFT  1  2  3  4  5  6  7  8  9  0  <-
-
-  Q  W  E  R  T  Y  U  I  O  P  !
-
-   A  S  D  F  G  H  J  K  L  ;  '
-
-    Z  X  C  V  B  N  M  ,  .  ?
-
-       SPACE      ENTER    TAB
-
+**NumPad Mode (Press 'N'):**
+```
+      7  8  9  /
+      4  5  6  *
+      1  2  3  -
+      0  .  <- +
+      ENTER   ABC
 ```
 
 **Special Keys:**
-- `SHIFT` = Toggle case (auto-disables after letter)
+- `CAPS` = Caps Lock toggle
+- `NUM` / `ABC` = Switch layout
+- `SHIFT` = Toggle case (one-time)
 - `__` = Spacebar
 - `<-` = Backspace
-- `ENTER` = Enter/Return
-- `TAB` = Tab
-- `;`, `'`, `,`, `.`, `?`, `!` = Punctuation
 
 ---
 
@@ -181,25 +192,11 @@ Press `t` during runtime to cycle through themes:
 | **Neon** | Purple/magenta with cyan text |
 | **Cyberpunk** | Dark blue with gold/yellow |
 | **Light** | Light mode for bright environments |
+| **High Contrast** | Black/White/Yellow for max visibility |
 
 ### Gesture Settings
 
-Edit `src/utils/config.py` to customize:
-
-```python
-# Gesture thresholds
-PINCH_THRESHOLD = 40        # Distance for pinch detection (pixels)
-DWELL_TIME = 0.2           # Hover time before activation (seconds)
-DEBOUNCE_INTERVAL = 0.3    # Minimum time between clicks (seconds)
-
-# Hand detection
-DETECTION_CONFIDENCE = 0.8  # Hand detection confidence (0.0-1.0)
-MAX_HANDS = 2              # Maximum hands to detect
-
-# UI
-BORDER_RADIUS = 20         # Corner radius for keys (pixels)
-FLASH_DURATION = 0.3       # Key flash duration (seconds)
-```
+Edit `src/utils/settings.py` or use the settings file created at `~/.touchless_keyboard/settings.json`.
 
 ---
 
@@ -211,51 +208,31 @@ FLASH_DURATION = 0.3       # Key flash duration (seconds)
 
 **Solutions:**
 1. Check if webcam is connected and working
-2. Try changing camera index in code:
-   ```python
-   cap = cv2.VideoCapture(1)  # Try 1, 2, etc.
+2. Set Environment Variable `WEBCAM_INDEX`:
+   ```bash
+   # Windows PowerShell
+   $env:WEBCAM_INDEX=1; python run.py
    ```
 3. Grant camera permissions to Python
-4. Close other apps using the webcam
 
 ### Audio Not Working
 
 **Problem:** No click sound
 
 **Solutions:**
-1. Check if `clickSound.mp3` exists in project folder
-2. Application will continue without audio (warning shown)
+1. Check if `clickSound.mp3` exists in `assets/`
+2. Press `]` to increase volume
 3. Verify pygame installation: `pip install pygame`
 
-### Hand Not Detected
+### Hand Not Detected / Jittery
 
-**Problem:** "Hand Not Detected" message
+**Problem:** Cursor shaking or not moving smoothly
 
 **Solutions:**
 1. Ensure good lighting conditions
-2. Position hand clearly in front of camera
-3. Adjust `DETECTION_CONFIDENCE` in config.py (lower = more sensitive)
+2. Press `K` to run calibration
+3. Adjust `smoothing_factor` in settings (lower = smoother)
 4. Keep hand within camera frame
-
-### Gestures Not Registering
-
-**Problem:** Clicks not working
-
-**Solutions:**
-1. Adjust `CLICK_THRESHOLD` in code (increase for easier detection)
-2. Ensure thumb and index finger are clearly visible
-3. Practice pinch gesture - bring fingers closer together
-4. Check `CLICK_DELAY` - may need to wait between clicks
-
-### Performance Issues
-
-**Problem:** Lag or low FPS
-
-**Solutions:**
-1. Close other applications
-2. Reduce webcam resolution in code
-3. Update graphics drivers
-4. Use a more powerful computer
 
 ---
 
@@ -277,7 +254,7 @@ Touchless-Keyboard/
 │   │   ├── file_utils.py       # File/clipboard operations
 │   │   ├── logging_config.py   # Structured logging
 │   │   ├── performance_monitor.py
-│   │   └── themes.py           # Color themes (Dark, Neon, etc.)
+│   │   └── themes.py           # Color themes
 │   └── apps/                   # Application entry points
 │       ├── main.py             # Main keyboard with modern UI
 │       └── virtual_keyboard_ai.py
@@ -293,32 +270,7 @@ Touchless-Keyboard/
 
 ##  Contributing
 
-Contributions are welcome! Here's how you can help:
-
-1. **Fork the repository**
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. **Commit your changes**
-   ```bash
-   git commit -m "Add amazing feature"
-   ```
-4. **Push to the branch**
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-5. **Open a Pull Request**
-
-### Ideas for Contributions
-
-- Add more gesture types
-- Implement ML gesture recognition
-- Add word prediction/autocomplete
-- Multi-language keyboard layouts
-- Mobile/tablet support
-- Performance optimizations
-- UI themes and customization
+Contributions are welcome!
 
 ---
 
@@ -328,46 +280,18 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-##  Acknowledgments
-
-- **MediaPipe** - Hand tracking technology
-- **cvzone** - Simplified hand detection
-- **OpenCV** - Computer vision library
-- **PyAutoGUI** - Keyboard simulation
-
----
-
-## 🌟 Star History
-
-If you find this project useful, please consider giving it a  on GitHub!
-
----
-
-##  Screenshots
-
-### Main Keyboard Interface
-![Main Interface](screenshots/main_interface.png)
-
-### Gesture Detection
-![Gesture Detection](screenshots/gesture_detection.png)
-
-### AI Version with Dual Hands
-![AI Version](screenshots/ai_version.png)
-
----
-
 ##  Roadmap
 
 - [x] Basic gesture keyboard
 - [x] Dual-hand AI version
 - [x] Gesture data collection
-- [x] Special keys and punctuation
-- [x] Visual feedback system
-- [x] Save/copy functionality
+- [x] Special keys (Caps, Num, Punctuation)
+- [x] Visual feedback & Help System
+- [x] Save/Copy & Undo/Redo
+- [x] Settings & Calibration
+- [x] Accessibility (High Contrast, Scaling)
 - [ ] ML gesture recognition model
-- [ ] Settings UI with calibration
 - [ ] Word prediction
-- [ ] Multi-language support
 - [ ] Mobile app version
 
 ---
