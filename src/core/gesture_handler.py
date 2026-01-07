@@ -52,11 +52,11 @@ class GestureSmoothing:
     
     def reset(self):
         """Clear the smoothing buffer."""
-        self.distances.clear()
+        self.smoothed_value = None
     
     def is_ready(self) -> bool:
-        """Check if buffer is full and smoothing is stable."""
-        return len(self.distances) == self.window_size
+        """Check if smoothing has initialized."""
+        return self.smoothed_value is not None
 
 
 class HandCalibration:

@@ -262,10 +262,10 @@ def generate_keyboard_layout(start_x: int = 50, start_y: int = 100,
         row_offset = row_index * 25 if layout == 'qwerty' else 0
         y = start_y + row_index * (key_height + gap)
         
+        current_x = start_x + row_offset
+        
         for col_index, key in enumerate(row):
-            x = start_x + row_offset + col_index * (key_width + gap)
-            
-            # Make special keys wider
+            # Calculate key width first
             if key == '__':
                 w = int(key_width * 2.5)
             elif key in ['ENTER', 'SHIFT', 'CAPS']:
@@ -274,8 +274,11 @@ def generate_keyboard_layout(start_x: int = 50, start_y: int = 100,
                 w = int(key_width * 1.2)
             else:
                 w = key_width
+                
+            keys.append((current_x, y, w, key_height, key))
             
-            keys.append((x, y, w, key_height, key))
+            # Update x for next key
+            current_x += w + gap
     
     return keys
 
