@@ -268,7 +268,7 @@ def generate_keyboard_layout(start_x: int = 50, start_y: int = 100,
             # Calculate key width first
             if key == '__':
                 w = int(key_width * 2.5)
-            elif key in ['ENTER', 'SHIFT', 'CAPS']:
+            elif key in ['ENTER', 'SHIFT', 'CAPS', '<-']:
                 w = int(key_width * 1.5)
             elif key in ['TAB', 'NUM', 'ABC']:
                 w = int(key_width * 1.2)
